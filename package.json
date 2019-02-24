@@ -4,7 +4,8 @@
   "description": "cli for blockchain",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --experimental-modules src/index.mjs"
   },
   "repository": {
     "type": "git",
