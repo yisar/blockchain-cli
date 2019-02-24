@@ -18,10 +18,10 @@ class BlockChain {
 
   mine() {
     const newBlock = this.generateNewBlock()
-    if (this.isValidBlock(newBlock)) {
+    if (this.isValidBlock(newBlock) && this.isValidChain(this.blockchain)) {
       this.blockchain.push(newBlock)
     } else {
-      console.log('区块校验失败', newBlock)
+      console.log('区块链校验失败', newBlock)
     }
   }
 
@@ -53,8 +53,7 @@ class BlockChain {
       .digest('hex')
   }
 
-  isValidBlock(newBlock) {
-    const lastBlock = this.getLastBlock()
+  isValidBlock(newBlock, lastBlock = this.getLastBlock()) {
     if (newBlock.index !== lastBlock.index + 1) return false
     if (newBlock.timestamp <= lastBlock.timestamp) return false
     if (newBlock.prevHash !== lastBlock.hash) return false
@@ -64,13 +63,19 @@ class BlockChain {
 
   }
 
-  isValidaChain() {
-
+  isValidChain(chain = this.blockchain) {
+    for (let i = chain.length - 1; i >= 1; i--) {
+      if (!this.isValidBlock(chain[i], chain[i - 1])) return false
+    }
+    if (JSON.stringify(chain[0]) !== JSON.stringify(INIT_BLOCK)) return false
+    return true
   }
 }
 
 let bc = new BlockChain()
 
+bc.mine()
+bc.mine()
 bc.mine()
 
 console.log(bc.blockchain)
