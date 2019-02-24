@@ -16,10 +16,12 @@ export default class Blockchain {
     this.difficulty = 4
   }
 
-  mine() {
+  mine(address) {
+    this.transfer('clicli', address, 100)
     const newBlock = this.generateNewBlock()
     if (this.isValidBlock(newBlock) && this.isValidChain(this.blockchain)) {
       this.blockchain.push(newBlock)
+      this.data = []
       return newBlock
     } else {
       console.log('区块链校验失败', newBlock)
@@ -28,6 +30,12 @@ export default class Blockchain {
 
   getLastBlock() {
     return this.blockchain[this.blockchain.length - 1]
+  }
+
+  transfer(from, to, amount) {
+    const data = { from, to, amount }
+    this.data.push(data)
+    return data
   }
 
   generateNewBlock() {
