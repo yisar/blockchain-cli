@@ -1,81 +1,44 @@
-import crypto from 'crypto'
+import vorpal from 'vorpal'
+import Blockchain from './blockchain'
 
-const INIT_BLOCK = {
-  index: 0,
-  prevHash: '0',
-  data: 'hello clicli!',
-  timestamp: 1550988664781,
-  nonce: 73479,
-  hash: '0000cf4a6139c07ef04792b79ad48142e957198e20a4d03d1008cf35f77e7b7c'
+const bc = new Blockchain()
+
+const cli = vorpal()
+
+cli
+  .command('mine', '挖矿')
+  .action(function (args, cb) {
+    const newBlock = bc.mine()
+    if (newBlock) console.log(newBlock)
+    cb()
+  })
+
+cli
+  .command('chain', '查看区块链')
+  .action(function (args, cb) {
+    console.log(bc.blockchain)
+    cb()
+  })
+
+
+console.log('welcome to cli-blockchain ~')
+
+cli
+  .exec('help')
+cli
+  .delimiter('cli =>')
+  .show()
+
+
+function formatLog(data) {
+  if (!Array.isArray(data)) data = [data]
+  const head = Object.keys[data[0]]
+  const table = new Table({
+    head,
+    colWidths: new Array(head.length).fill(15)
+  })
+  const res = data.map(v => {
+    return head.map(h => v[h])
+  })
+  table.push(...res)
 }
-
-class BlockChain {
-  constructor() {
-    this.blockchain = [INIT_BLOCK]
-    this.data = []
-    this.difficulty = 4
-  }
-
-  mine() {
-    const newBlock = this.generateNewBlock()
-    if (this.isValidBlock(newBlock) && this.isValidChain(this.blockchain)) {
-      this.blockchain.push(newBlock)
-    } else {
-      console.log('区块链校验失败', newBlock)
-    }
-  }
-
-  getLastBlock() {
-    return this.blockchain[this.blockchain.length - 1]
-  }
-
-  generateNewBlock() {
-    let
-      index = this.blockchain.length,
-      prevHash = this.getLastBlock().hash,
-      data = this.data,
-      timestamp = new Date().getTime(),
-      nonce = 0
-
-    let hash = this.computeHash(index, prevHash, timestamp, data, nonce)
-    while (hash.slice(0, this.difficulty) !== '0'.repeat(this.difficulty)) {
-      nonce++
-      hash = this.computeHash(index, prevHash, timestamp, data, nonce)
-    }
-
-    return { index, prevHash, timestamp, data, nonce, hash }
-  }
-
-  computeHash(index, prevHash, timestamp, data, nonce) {
-    return crypto
-      .createHash('sha256')
-      .update(index + prevHash + timestamp + data + nonce)
-      .digest('hex')
-  }
-
-  isValidBlock(newBlock, lastBlock = this.getLastBlock()) {
-    if (newBlock.index !== lastBlock.index + 1) return false
-    if (newBlock.timestamp <= lastBlock.timestamp) return false
-    if (newBlock.prevHash !== lastBlock.hash) return false
-    if (newBlock.hash.slice(0, this.difficulty) !== '0'.repeat(4)) return false
-
-    return true
-
-  }
-
-  isValidChain(chain = this.blockchain) {
-    for (let i = chain.length - 1; i >= 1; i--) {
-      if (!this.isValidBlock(chain[i], chain[i - 1])) return false
-    }
-    if (JSON.stringify(chain[0]) !== JSON.stringify(INIT_BLOCK)) return false
-    return true
-  }
-}
-
-let bc = new BlockChain()
-
-bc.mine()
-bc.mine()
-bc.mine()
-
-console.log(bc.blockchain)
