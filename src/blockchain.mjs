@@ -33,9 +33,28 @@ export default class Blockchain {
   }
 
   transfer(from, to, amount) {
+    if (from !== 'clicli') {
+      const blance = this.blance(from)
+      if (blance < amount) {
+        console.log('余额不够', from, to, amount)
+        return
+      }
+    }
     const data = { from, to, amount }
     this.data.push(data)
     return data
+  }
+
+  blance(address) {
+    let blance = 0
+    this.blockchain.forEach(block => {
+      if (!Array.isArray(block.data)) return
+      block.data.forEach(trans => {
+        if (address === trans.from) blance -= trans.amount
+        if (address === trans.to) blance += trans.amount
+      })
+    })
+    return blance
   }
 
   generateNewBlock() {

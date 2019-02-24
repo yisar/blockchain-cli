@@ -25,7 +25,7 @@ cli
   .command('trans <from> <to> <amount>', '转账')
   .action(function (args, cb) {
     let trans = bc.transfer(args.from, args.to, args.amount)
-    formatLog(trans)
+    if(trans) formatLog(trans)
     cb()
   })
 
@@ -34,6 +34,14 @@ cli
   .action(function (args, cb) {
     const block = bc.blockchain[args.index]
     this.log(JSON.stringify(block, null, 2))
+    cb()
+  })
+
+cli
+  .command('blance <address>', '查看区块详情')
+  .action(function (args, cb) {
+    const blance = bc.blance(args.address)
+    if (blance) formatLog({ blance, address: args.address })
     cb()
   })
 
