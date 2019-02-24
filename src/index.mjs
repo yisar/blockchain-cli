@@ -17,6 +17,19 @@ class BlockChain {
   }
 
   mine() {
+    const newBlock = this.generateNewBlock()
+    if (this.isValidBlock(newBlock)) {
+      this.blockchain.push(newBlock)
+    } else {
+      console.log('区块校验失败', newBlock)
+    }
+  }
+
+  getLastBlock() {
+    return this.blockchain[this.blockchain.length - 1]
+  }
+
+  generateNewBlock() {
     let
       index = this.blockchain.length,
       prevHash = this.getLastBlock().hash,
@@ -30,16 +43,7 @@ class BlockChain {
       hash = this.computeHash(index, prevHash, timestamp, data, nonce)
     }
 
-    console.log('挖矿完毕', { index, prevHash, timestamp, data, nonce, hash })
-
-  }
-
-  getLastBlock() {
-    return this.blockchain[this.blockchain.length - 1]
-  }
-
-  generateNewBlock() {
-
+    return { index, prevHash, timestamp, data, nonce, hash }
   }
 
   computeHash(index, prevHash, timestamp, data, nonce) {
@@ -49,7 +53,14 @@ class BlockChain {
       .digest('hex')
   }
 
-  isValidBlock() {
+  isValidBlock(newBlock) {
+    const lastBlock = this.getLastBlock()
+    if (newBlock.index !== lastBlock.index + 1) return false
+    if (newBlock.timestamp <= lastBlock.timestamp) return false
+    if (newBlock.prevHash !== lastBlock.hash) return false
+    if (newBlock.hash.slice(0, this.difficulty) !== '0'.repeat(4)) return false
+
+    return true
 
   }
 
@@ -61,3 +72,5 @@ class BlockChain {
 let bc = new BlockChain()
 
 bc.mine()
+
+console.log(bc.blockchain)
